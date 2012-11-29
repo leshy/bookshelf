@@ -8,11 +8,7 @@ async = require 'async'
 db = new mongodb.Db('bookshelf', new mongodb.Server('localhost', 27017), {safe: true})
 books = new comm.MongoCollectionNode { db: db, collection: 'book' }
 
-bla = -> 
-    books.find {}, {}, (data) ->
-        if data then console.log data
-    
-db.open bla
+db.open -> true
 
 # web
 
@@ -34,22 +30,19 @@ websocket = new comm.WebsocketServer realm: "web", express: app
 websocket.listen()
 
 core = new comm.MsgNode()
-
 core.pass()
 
 core.subscribe true, (msg,reply,next,transmit) ->
     console.log "GOT",msg
     reply.end()
-    transmit()
 
 books.connect core
 
-
 http = new comm.HttpServer realm: "web", express: app, root: '/rest/'
 rest = new comm.Rest root: '/rest/apiv1/'
-rest.connect http
 
+rest.connect http
 core.connect rest
-#core.connect websocket
+core.connect websocket
 
 

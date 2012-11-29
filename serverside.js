@@ -1,5 +1,5 @@
 (function() {
-  var app, async, bla, books, comm, core, db, express, http, mongodb, rest, websocket;
+  var app, async, books, comm, core, db, express, http, mongodb, rest, websocket;
   comm = require('comm/serverside');
   mongodb = require('mongodb');
   express = require('express');
@@ -11,14 +11,9 @@
     db: db,
     collection: 'book'
   });
-  bla = function() {
-    return books.find({}, {}, function(data) {
-      if (data) {
-        return console.log(data);
-      }
-    });
-  };
-  db.open(bla);
+  db.open(function() {
+    return true;
+  });
   app = express.createServer();
   app.configure(function() {
     app.set('views', __dirname + '/views');
@@ -43,8 +38,7 @@
   core.pass();
   core.subscribe(true, function(msg, reply, next, transmit) {
     console.log("GOT", msg);
-    reply.end();
-    return transmit();
+    return reply.end();
   });
   books.connect(core);
   http = new comm.HttpServer({
@@ -57,4 +51,5 @@
   });
   rest.connect(http);
   core.connect(rest);
+  core.connect(websocket);
 }).call(this);
